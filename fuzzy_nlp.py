@@ -1,7 +1,7 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
-from rapidfuzz import fuzz
+from pydantic import BaseModel
+from rapidfuzz.fuzz import token_set_ratio
 import spacy
 from nltk.corpus import wordnet as wn
 from spellchecker import SpellChecker
@@ -11,7 +11,7 @@ from unidecode import unidecode
 nlp = spacy.load("en_core_web_sm")
 spell = SpellChecker(language="en")
 
-# Sample testimony documents
+# Sample documents
 documents = [
     "The colour of the knife was red.",
     "He used a dagger in the attack.",
@@ -20,7 +20,7 @@ documents = [
     "She witnessed the murder.",
 ]
 
-# ---------------- NLP Normalizer ---------------- #
+# NLP helpers
 def get_synonyms(word):
     synonyms = set()
     for syn in wn.synsets(word):
@@ -43,7 +43,6 @@ def normalize_text(text):
         tokens.extend(get_synonyms(corrected))
     return set(tokens)
 
-# ---------------- Fuzzy Matching Logic ---------------- #
 def jaccard_similarity(set1, set2):
     if not set1 or not set2:
         return 0.0
@@ -56,7 +55,7 @@ def find_matches(query: str, j_thresh=0.3, fuzz_thresh=70):
     for doc in documents:
         doc_tokens = normalize_text(doc)
         jac = jaccard_similarity(query_tokens, doc_tokens)
-        fuzz_score = fuzz.token_set_ratio(query, doc)
+        fuzz_score = token_set_ratio(query, doc)
 
         if jac >= j_thresh or fuzz_score >= fuzz_thresh:
             results.append({
@@ -66,17 +65,21 @@ def find_matches(query: str, j_thresh=0.3, fuzz_thresh=70):
             })
     return sorted(results, key=lambda x: (x["jaccard"], x["fuzz"]), reverse=True)
 
-# ---------------- FastAPI App ---------------- #
+# FastAPI app
 app = FastAPI()
 
-# Enable CORS for Power BI or browsers
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ← change to ["https://yourdomain.com"] in production
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/search")
-def search(q: str = Query(...)):
-    return find_matches(q)
+# Request model for POST
+class SearchRequest(BaseModel):
+    query: str
+
+@app.post("/search")
+def search(request: SearchRequest):
+    return find_matches(request.query)

@@ -1,17 +1,29 @@
-from flask import Flask, request, jsonify
-from fuzzy_nlp import find_matches  # use the previous NLP script logic here
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from fuzzy_nlp import find_matches  # Make sure this is implemented correctly
 
-app = Flask(__name__)
+# Initialize FastAPI app
+app = FastAPI()
 
-# Endpoint for fuzzy search
-@app.route("/search", methods=["POST"])
-def search():
-    data = request.json
-    query = data.get("query", "")
-    documents = data.get("documents", [])
-    
-    matches = find_matches(query, documents)
-    return jsonify(matches)
+# Enable CORS (helpful for Power BI or web apps calling this)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific domains
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+# Define request model
+class SearchRequest(BaseModel):
+    query: str
+
+# Define POST endpoint
+@app.post("/search")
+def search(request: SearchRequest):
+    return find_matches(request.query)
+
+# Local run entry point (optional)
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
