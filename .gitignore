@@ -1,0 +1,86 @@
+# -------------------
+# 🐍 Python
+# -------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.so
+
+# Ignore compiled binaries
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Ignore test and coverage
+.coverage
+.tox/
+.nox/
+.cache/
+pytest_cache/
+htmlcov/
+
+# -------------------
+# ⚙️ Virtual Environments
+# -------------------
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+local_env/
+Pipfile.lock
+
+# -------------------
+# 📄 Log & Database files
+# -------------------
+*.log
+*.sqlite3
+*.db
+
+# -------------------
+# 🖼️ OS & Editor Specific
+# -------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -------------------
+# 🧠 VS Code
+# -------------------
+.vscode/
+
+# -------------------
+# 📘 Jupyter
+# -------------------
+.ipynb_checkpoints/
+
+# -------------------
+# 🔧 Azure Deployment
+# -------------------
+.local/
+.ssh/
+*.zip
+*.tar.gz
+
+# -------------------
+# 🧾 Node-related (if using JS frontends)
+# -------------------
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+pnpm-lock.yaml
+
+# -------------------
+# ✅ What to keep (do NOT ignore these)
+# -------------------
+!requirements.txt
+!*.py
+!*.md
+!.gitignore
+myenv/
